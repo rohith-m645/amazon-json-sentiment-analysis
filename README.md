@@ -1,4 +1,5 @@
 **📊 Amazon JSON Sentiment Analysis using SQLite
+
 🚀 Project Overview**
 
 This project performs rule-based sentiment analysis on Amazon review data stored in a JSON file.
@@ -65,10 +66,13 @@ disappointing
 terrible
 
 Sentiment Classification:
-Score	Sentiment
-> 0	Positive
-< 0	Negative
-= 0	Neutral
+
+**Score       	Sentiment**
+> 0          	Positive
+< 0          	Negative
+= 0          	Neutral
+
+ 
 **🛠 Technologies Used**
 
 Python 3.12
