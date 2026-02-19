@@ -1,6 +1,6 @@
-**📊 Amazon JSON Sentiment Analysis using SQLite
+**📊 Amazon JSON Sentiment Analysis using SQLite**
 
-🚀 Project Overview**
+**🚀 Project Overview**
 
 This project performs rule-based sentiment analysis on Amazon review data stored in a JSON file.
 Each review is analyzed, assigned a sentiment score, classified as Positive/Negative/Neutral, and stored in a SQLite database with a timestamp.
