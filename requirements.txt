@@ -1,0 +1,5 @@
+# Amazon Review Sentiment Analysis Project
+# No external dependencies required.
+# Uses Python Standard Library only.
+
+python>=3.10
