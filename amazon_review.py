@@ -30,7 +30,6 @@ negative_words = {
     "useless": -3
 }
 
-# Stop words for better pattern detection
 stop_words = {
     "the", "is", "a", "and", "to", "of", "for",
     "it", "this", "i", "in", "that", "was",
@@ -45,19 +44,19 @@ def calculate_score(text):
     score = 0
     text = text.lower()
 
-    # Negation handling
+    # Negation
     if "not good" in text:
         score -= 2
     if "not bad" in text:
         score += 1
 
-    # Emphasis handling
+    # Emphasis
     if "very good" in text:
         score += 2
     if "very bad" in text:
         score -= 2
 
-    # Weighted scoring
+    # Weighted words
     for word, value in positive_words.items():
         if word in text:
             score += value
@@ -83,7 +82,7 @@ def classify(score):
 
 
 # ==========================================
-# PROCESS REVIEW (Multiprocessing Worker)
+# MULTIPROCESS WORKER
 # ==========================================
 
 def process_review(line):
@@ -93,12 +92,13 @@ def process_review(line):
         review_text = data.get("reviewText", "")
         reviewer_id = data.get("reviewerID", "")
         asin = data.get("asin", "")
+        rating = data.get("overall", 0)
 
         score = calculate_score(review_text)
         sentiment = classify(score)
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        return (reviewer_id, asin, review_text, score, sentiment, timestamp)
+        return (reviewer_id, asin, rating, review_text, score, sentiment, timestamp)
 
     except:
         return None
@@ -123,7 +123,6 @@ def main():
         print("Error: reviews.json not found.")
         return
 
-    # Multiprocessing
     print("Using CPU Cores:", cpu_count())
 
     with Pool(cpu_count()) as pool:
@@ -133,7 +132,10 @@ def main():
 
     print("Parallel Processing Completed.")
 
-    # Database
+    # ======================================
+    # DATABASE
+    # ======================================
+
     try:
         conn = sqlite3.connect("amazon_json_sentiment.db")
         cursor = conn.cursor()
@@ -143,6 +145,7 @@ def main():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             reviewerID TEXT,
             asin TEXT,
+            rating REAL,
             review TEXT,
             score INTEGER,
             sentiment TEXT,
@@ -150,14 +153,13 @@ def main():
         )
         """)
 
-        # CLEAR OLD DATA (Important Fix)
         cursor.execute("DELETE FROM results")
         conn.commit()
 
         cursor.executemany("""
         INSERT INTO results
-        (reviewerID, asin, review, score, sentiment, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?)
+        (reviewerID, asin, rating, review, score, sentiment, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """, results)
 
         conn.commit()
@@ -177,7 +179,7 @@ def main():
 
     cursor.execute("SELECT COUNT(*) FROM results")
     total = cursor.fetchone()[0]
-    print("Total Reviews in DB:", total)
+    print("Total Reviews:", total)
 
     cursor.execute("""
         SELECT sentiment, COUNT(*)
@@ -185,22 +187,50 @@ def main():
         GROUP BY sentiment
     """)
 
+    sentiment_counts = cursor.fetchall()
+
     print("\nSentiment Distribution:")
-    for row in cursor.fetchall():
-        print(row[0], ":", row[1])
+    sentiment_dict = {}
+    for sentiment, count in sentiment_counts:
+        sentiment_dict[sentiment] = count
+        percentage = (count / total) * 100
+        print(f"{sentiment} : {count} ({percentage:.2f}%)")
 
     cursor.execute("SELECT AVG(score) FROM results")
     avg_score = cursor.fetchone()[0]
     print("\nAverage Score:", round(avg_score, 2))
 
-    # Word frequency without stop words
+    # ======================================
+    # RATING VS SENTIMENT COMPARISON
+    # ======================================
+
+    cursor.execute("""
+        SELECT COUNT(*) FROM results
+        WHERE rating >= 4 AND sentiment = 'Negative'
+    """)
+    mismatch_positive_rating = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT COUNT(*) FROM results
+        WHERE rating <= 2 AND sentiment = 'Positive'
+    """)
+    mismatch_negative_rating = cursor.fetchone()[0]
+
+    print("\nRating vs Sentiment Mismatch:")
+    print("High rating but Negative sentiment:", mismatch_positive_rating)
+    print("Low rating but Positive sentiment:", mismatch_negative_rating)
+
+    # ======================================
+    # WORD FREQUENCY PATTERN
+    # ======================================
+
     cursor.execute("SELECT review FROM results")
     word_counter = Counter()
 
     for row in cursor.fetchall():
         words = row[0].lower().split()
-        filtered_words = [w for w in words if w not in stop_words]
-        word_counter.update(filtered_words)
+        filtered = [w for w in words if w not in stop_words]
+        word_counter.update(filtered)
 
     print("\nTop 10 Meaningful Words:")
     for word, count in word_counter.most_common(10):
@@ -213,6 +243,5 @@ def main():
     print("\nProcess Completed Successfully.")
 
 
-# Entry Point
 if __name__ == "__main__":
     main()
