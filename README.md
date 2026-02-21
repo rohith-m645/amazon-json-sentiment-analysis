@@ -1,86 +1,143 @@
-**📊 Amazon JSON Sentiment Analysis using SQLite**
+**📊 Amazon Review Sentiment Analysis System**
 
 **🚀 Project Overview**
 
-This project performs rule-based sentiment analysis on Amazon review data stored in a JSON file.
-Each review is analyzed, assigned a sentiment score, classified as Positive/Negative/Neutral, and stored in a SQLite database with a timestamp.
+This project implements an Advanced Rule-Based Sentiment Analysis System for Amazon product reviews.
 
-The goal of this project is to demonstrate:
+The system:
 
-Text processing
+Reads review data from a JSON dataset
 
-Rule-based sentiment scoring
+Applies linguistic rules to calculate sentiment score
 
-JSON file handling
+Classifies reviews as Positive, Negative, or Neutral
 
-SQLite database integration
+Uses multiprocessing for fast large-scale processing
 
-Exception handling in Python
+Stores results in a SQLite database
 
-**📂 Dataset**
+Performs pattern analysis and reporting
 
-Format: JSON (Line-by-line JSON records)
+Total dataset processed: 194,000+ reviews
 
-Source: Amazon Reviews Dataset
+**🧠 Features**
+🔹 Text Processing
 
-Total Records Processed: 20,000+
+Lowercase normalization
 
-Each JSON record contains:
+Stop-word filtering
 
-reviewerID
+Word frequency analysis
 
-asin (product ID)
+🔹 Rule-Based Sentiment Engine
 
-reviewText
+Weighted positive & negative keywords
 
-rating
+Negation handling (e.g., "not good")
 
-reviewTime
+Emphasis detection (e.g., "very good")
 
-**🧠 Sentiment Logic (Rule-Based)**
+Long-review boost rule
 
-The scoring system is based on keyword matching.
+Threshold-based classification
 
-Positive Keywords:
+🔹 Performance Optimization
 
-good
+Multiprocessing using all CPU cores
 
-excellent
+Bulk database insertion
 
-amazing
+Execution time measurement
 
-happy
+🔹 Pattern Analysis
 
-great
+Sentiment distribution (count + percentage)
 
-Negative Keywords:
+Average sentiment score
 
-bad
+Rating vs sentiment mismatch detection
 
-worst
+Top 10 meaningful word extraction
 
-poor
-
-disappointing
-
-terrible
-
-Sentiment Classification:
-
-**Score       	Sentiment**
-> 0          	Positive
-< 0          	Negative
-= 0          	Neutral
-
- 
-**🛠 Technologies Used**
+🛠 Technologies Used
 
 Python 3.12
 
 SQLite3
 
-JSON module
+Multiprocessing
 
-Datetime module
+JSON Processing
 
-Exception Handling
+Collections (Counter)
+
+Standard Library Modules
+
+No external dependencies required.
+
+📂 Project Structure
+amazon_review/
+│
+├── amazon_review.py
+├── README.md
+├── requirements.txt
+└── .gitignore
+⚙ How to Run
+
+1️⃣ Place reviews.json in the project folder
+2️⃣ Open terminal inside project directory
+3️⃣ Run:
+
+py amazon_review.py
+
+**📊 Sample Output**
+Total Reviews Loaded: 194439
+Using CPU Cores: 16
+Parallel Processing Completed.
+Data inserted successfully.
+Total Inserted: 194439
+
+===== PATTERN ANALYSIS =====
+
+Sentiment Distribution:
+Positive : 107027 (55.03%)
+Neutral  : 84285 (43.34%)
+Negative : 3127 (1.61%)
+
+Average Score: 2.15
+Execution Time: 4.59 seconds
+🗄 Database Schema
+
+Table: results
+
+Column	Type
+id	INTEGER
+reviewerID	TEXT
+asin	TEXT
+rating	REAL
+review	TEXT
+score	INTEGER
+sentiment	TEXT
+timestamp	TEXT
+
+**📈 Key Insights**
+
+Majority of reviews are Positive (~55%)
+
+Negative reviews are minimal (~1–2%)
+
+Dataset mainly discusses phone-related products
+
+High efficiency: 194K reviews processed in under 5 seconds
+
+**🎓 Learning Outcomes
+**
+Implemented rule-based NLP system
+
+Applied multiprocessing for scalability
+
+Designed SQLite data pipeline
+
+Performed real-world pattern mining
+
+Built performance-optimized sentiment engine
